@@ -10,5 +10,18 @@
 // * Print the variable within the while loop
 // * Do not use break to exit the loop
 
-fn main() {}
+use std::env;
 
+fn main() {
+    let start_num: i32 = env::args()
+        .nth(1)
+        .and_then(|s| s.parse::<i32>().ok())
+        .unwrap_or_else(|| panic!("Expected a positive i32 parameter"));
+
+    let mut num: i32 = start_num;
+
+    while num > 0 {
+        println!("{}", num);
+        num -= 1;
+    }
+}
