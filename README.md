@@ -1,3 +1,6 @@
+My own fork of Zero To Mastery Activities. This was not created properly as a fork, so it doesn't link original repository, but below is the original ReadMe text with the links.
+
+
 # About
 This repository is part of the Rust programming language course available at [zerotomastery.io](https://zerotomastery.io/). This repository (along with the lecture slides for this course) is available as a zip package [here](https://cdn.jayson.info/ztm/zerotomastery.io-rust.zip).
 
