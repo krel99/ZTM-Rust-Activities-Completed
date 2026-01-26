@@ -10,5 +10,31 @@
 // * Implement functionality on the box struct to create a new box
 // * Implement functionality on the box struct to print the characteristics
 
-fn main() {}
+#![allow(dead_code)]
+#[derive(Debug)]
+struct Box {
+    dimensions: (i32, i32, i32),
+    weight: i32,
+    color: Color,
+}
 
+#[derive(Debug)]
+enum Color {
+    Red,
+}
+
+impl Box {
+    fn new(dimensions: (i32, i32, i32), weight: i32, color: Color) -> Self {
+        Box {
+            dimensions,
+            weight,
+            color,
+        }
+    }
+}
+
+fn main() {
+    let box1 = Box::new((10, 15, 7), 32, Color::Red);
+
+    println!("{:?}", box1);
+}
