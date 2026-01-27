@@ -12,5 +12,17 @@
 //   to uppercase and lowercase
 //   * Try searching for: to_uppercase, to_lowercase
 
-fn main() {}
+use std::env;
 
+fn main() {
+    let input: String = env::args()
+        .nth(1)
+        .and_then(|s| s.parse::<String>().ok())
+        .unwrap_or_else(|| panic!("Expected String parameter"));
+
+    let lowercase = input.to_lowercase();
+    let uppercase = input.to_uppercase();
+
+    println!("Lowercase: {}", lowercase);
+    println!("Uppercase: {}", uppercase);
+}
