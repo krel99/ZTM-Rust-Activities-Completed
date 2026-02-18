@@ -19,4 +19,3 @@ trait Body {}
 trait Color {}
 
 fn main() {}
-

@@ -23,13 +23,38 @@ fn clamp(n: i32, lower: i32, upper: i32) -> i32 {
 
 /// Divides a and b.
 fn div(a: i32, b: i32) -> Option<i32> {
-    Some(a / b)
+    if b == 0 {
+        None
+    } else {
+        Some(a / b)
+    }
 }
 
 /// Takes two strings and places them immediately one after another.
 fn concat(first: &str, second: &str) -> String {
-    format!("{} {}", first, second)
+    format!("{}{}", first, second)
 }
 
 fn main() {}
 
+#[test]
+fn test_clamp() {
+    assert_eq!(clamp(5, 1, 10), 5);
+    assert_eq!(clamp(15, 1, 10), 10);
+    assert_eq!(clamp(10, 10, 10), 10);
+    assert_eq!(clamp(10, 10, 15), 10);
+    // assert_eq!(clamp(10, 15, 10), 10); - may want to handle this
+    assert_eq!(clamp(15, 10, 10), 10);
+}
+
+#[test]
+fn test_div() {
+    assert_eq!(div(10, 2), Some(5));
+    assert_eq!(div(10, 0), None);
+}
+
+#[test]
+fn test_concat() {
+    assert_eq!(concat("Hello ", "World"), "Hello World");
+    assert_eq!(concat("Goodbye ", "Moon"), "Goodbye Moon");
+}

@@ -23,5 +23,43 @@
 // * The program should be case-insensitive (the user should be able to type
 //   Reboot, reboot, REBOOT, etc.)
 
-fn main() {}
+use std::{env, str::FromStr};
 
+enum PowerState {
+    Off,
+    Sleep,
+    Reboot,
+    Shutdown,
+    Hibernate,
+}
+
+impl FromStr for PowerState {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "off" => Ok(PowerState::Off),
+            "sleep" => Ok(PowerState::Sleep),
+            "reboot" => Ok(PowerState::Reboot),
+            "shutdown" => Ok(PowerState::Shutdown),
+            "hibernate" => Ok(PowerState::Hibernate),
+            _ => Err(format!("Invalid power state: {}", s)),
+        }
+    }
+}
+
+fn main() {
+    let value: PowerState = env::args()
+        .nth(1)
+        .expect("Missing argument")
+        .parse()
+        .unwrap_or_else(|e| panic!("Error: {}", e));
+
+    match value {
+        PowerState::Off => println!("Turning off"),
+        PowerState::Sleep => println!("Sleeping"),
+        PowerState::Reboot => println!("Rebooting"),
+        PowerState::Shutdown => println!("Shutting down"),
+        PowerState::Hibernate => println!("Hibernating"),
+    }
+}
