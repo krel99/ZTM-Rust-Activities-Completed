@@ -25,8 +25,9 @@ use crossbeam_channel::{unbounded, Receiver};
 use std::thread::{self, JoinHandle};
 
 enum LightMsg {
-    // Add additional variants needed to complete the exercise
     ChangeColor(u8, u8, u8),
+    On,
+    Off,
     Disconnect,
 }
 
@@ -36,10 +37,68 @@ enum LightStatus {
 }
 
 fn spawn_light_thread(receiver: Receiver<LightMsg>) -> JoinHandle<LightStatus> {
-    // Add code here to spawn a thread to control the light bulb
+    thread::spawn(move || {
+        let mut status = LightStatus::Off;
+        loop {
+            match receiver.recv() {
+                Ok(msg) => match msg {
+                    LightMsg::ChangeColor(r, g, b) => {
+                        println!(
+                            "Color changed to ({}, {}, {}). Light is {}.",
+                            r,
+                            g,
+                            b,
+                            match status {
+                                LightStatus::On => "on",
+                                LightStatus::Off => "off",
+                            }
+                        );
+                    }
+                    LightMsg::On => {
+                        println!("Light turned on");
+                        status = LightStatus::On;
+                    }
+                    LightMsg::Off => {
+                        println!("Light turned off");
+                        status = LightStatus::Off;
+                    }
+                    LightMsg::Disconnect => {
+                        println!("Disconnecting. Light off.");
+                        status = LightStatus::Off;
+                        return status;
+                    }
+                },
+                Err(_) => {
+                    println!("Channel disconnected. Light off.");
+                    status = LightStatus::Off;
+                    return status;
+                }
+            }
+        }
+    })
 }
 
-fn main() {}
+fn main() {
+    let (s, r) = unbounded();
+
+    let light = spawn_light_thread(r);
+
+    s.send(LightMsg::On).expect("failed to send");
+    s.send(LightMsg::ChangeColor(255, 0, 0))
+        .expect("failed to send");
+    s.send(LightMsg::ChangeColor(0, 255, 0))
+        .expect("failed to send");
+    s.send(LightMsg::Off).expect("failed to send");
+    s.send(LightMsg::ChangeColor(0, 0, 255))
+        .expect("failed to send");
+    s.send(LightMsg::Disconnect).expect("failed to send");
+
+    let final_status = light.join().expect("failed to join light thread");
+    match final_status {
+        LightStatus::Off => println!("Final status: light is off"),
+        LightStatus::On => println!("Final status: light is on"),
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -74,4 +133,3 @@ mod test {
         }
     }
 }
-

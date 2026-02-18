@@ -12,5 +12,31 @@
 
 const MOCK_DATA: &'static str = include_str!("mock-data.csv");
 
-fn main() {}
+#[derive(Debug)]
+#[allow(dead_code)]
+struct Person<'a> {
+    name: &'a str,
+    title: &'a str,
+}
 
+fn parse_persons(data: &str) -> Vec<Person<'_>> {
+    data.lines()
+        .skip(1) // skip header row
+        .filter_map(|line| {
+            let mut fields = line.split(',');
+            let _id = fields.next()?;
+            let name = fields.next()?;
+            let _email = fields.next()?;
+            let _dept = fields.next()?;
+            let title = fields.next()?;
+            Some(Person { name, title })
+        })
+        .collect()
+}
+
+fn main() {
+    let persons = parse_persons(MOCK_DATA);
+    for person in &persons {
+        println!("{}: {}", person.name, person.title);
+    }
+}

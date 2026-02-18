@@ -18,7 +18,9 @@
 //   - parking_lot
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
+use parking_lot::Mutex;
 use std::collections::VecDeque;
+use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -57,7 +59,7 @@ impl Worker<Message> {
 }
 
 /// Create a new worker to receive jobs.
-fn spawn_worker() -> Worker<Message> {
+fn spawn_worker(counter: Arc<Mutex<usize>>) -> Worker<Message> {
     let (tx, rx) = unbounded();
     // We clone the receiving end here so we have a copy to give to the
     // thread. This allows us to save the `tx` and `rx` into the Worker struct.
@@ -73,11 +75,14 @@ fn spawn_worker() -> Worker<Message> {
             // no more are available.
             loop {
                 // Get the next job.
-                for job in jobs.pop_front() {
+                if let Some(job) = jobs.pop_front() {
                     match job {
                         Job::Print(msg) => println!("{}", msg),
                         Job::Sum(lhs, rhs) => println!("{}+{}={}", lhs, rhs, lhs + rhs),
                     }
+                    // Increment the shared counter after completing a job.
+                    let mut count = counter.lock();
+                    *count += 1;
                 }
                 // Check for messages on the channel.
                 if let Ok(msg) = rx_thread.try_recv() {
@@ -131,10 +136,13 @@ fn main() {
 
     let jobs_sent = jobs.len();
 
+    // Shared counter for tracking completed jobs.
+    let counter = Arc::new(Mutex::new(0usize));
+
     let mut workers = vec![];
     // Spawn 4 workers to process jobs.
     for _ in 0..4 {
-        let worker = spawn_worker();
+        let worker = spawn_worker(Arc::clone(&counter));
         workers.push(worker);
     }
 
@@ -159,6 +167,7 @@ fn main() {
 
     println!("Jobs sent: {}", jobs_sent);
 
-    // print out the number of jobs completed here.
+    // Print out the number of jobs completed.
+    let jobs_completed = counter.lock();
+    println!("Jobs completed: {}", *jobs_completed);
 }
-

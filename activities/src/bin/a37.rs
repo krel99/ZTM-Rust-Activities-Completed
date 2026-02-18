@@ -22,8 +22,40 @@
 // * Utilize the `thiserror` crate for your error type
 // * Run `cargo test --bin a37` to test your implementation
 
+use std::convert::TryFrom;
+use thiserror::Error;
+
+#[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq)]
 struct Rgb(u8, u8, u8);
+
+#[allow(dead_code)]
+#[derive(Debug, Error)]
+enum RgbError {
+    #[error("missing hash symbol")]
+    MissingHash,
+    #[error("invalid hex color length: expected 7 characters, got {0}")]
+    InvalidLength(usize),
+    #[error("failed to parse hex component: {0}")]
+    ParseError(#[from] std::num::ParseIntError),
+}
+
+impl TryFrom<&str> for Rgb {
+    type Error = RgbError;
+
+    fn try_from(hex: &str) -> Result<Self, Self::Error> {
+        if !hex.starts_with('#') {
+            return Err(RgbError::MissingHash);
+        }
+        if hex.len() != 7 {
+            return Err(RgbError::InvalidLength(hex.len()));
+        }
+        let r = u8::from_str_radix(&hex[1..3], 16)?;
+        let g = u8::from_str_radix(&hex[3..5], 16)?;
+        let b = u8::from_str_radix(&hex[5..7], 16)?;
+        Ok(Rgb(r, g, b))
+    }
+}
 
 fn main() {
     // Use `cargo test --bin a37` to test your implementation
@@ -82,4 +114,3 @@ mod test {
         );
     }
 }
-
